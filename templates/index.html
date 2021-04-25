@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>new_erraindex</title>
+	<meta charset="utf-8">
+	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link href="https://fonts.googleapis.com/css?family=Amatic+SC|Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script></head>
+<body>
+<!-- Navbar -->
+	<nav class="navbar navbar-expand-md flex-column navbar-dark" style="background-color: #ad64de;">
+	    <a class="navbar-brand align-self-center m-0 pb-3  pb-md-0" href="/" style="font-family: 'Luminari'; font-size: 36pt;">new_erra</a>
+	    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+	        <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse justify-content-md-center w-100" id="navbarNav">
+	        <ul class="navbar-nav text-center">
+	            <li class="nav-item active" >
+	                <a class="nav-link" href="/">Магазин<span class="sr-only">(current)</span></a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link" href="#">Работы</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link" href="#">Обо мне</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link" href="#">Контакты</a>
+	            </li>
+	        </ul>
+	    </div></nav> 
+<!-- Cart/Login -->
+	<div class="container-fluid container">
+		<ul class="nav justify-content-end navbar-dark" style="margin-top: 10px;margin-bottom: -10px;">
+			{% if auth %}
+			<li class="nav-item">
+        		<a href="#AddModal" class="nav-link link-dark trigger-btn special-button" data-toggle="modal" >Транзакции</a>
+        	</li> {% endif %}
+        	<li class="nav-item">
+        		<a class="nav-link link-dark link-pink" href="/cart">&nbsp;&nbsp;Корзина</a>
+        	</li>
+	      	<li class="nav-item">
+	      		{% if logged_in %}
+					<a class="nav-link link-dark link-pink" href="/logout">Выйти</a>
+				{% else %}
+					<a class="nav-link link-dark link-pink" href="#LoginModal" class="trigger-btn" data-toggle="modal">Авторизоваться</a>
+				{% endif %}
+	      	</li>
+	    </ul></div>
+<!-- Products -->
+  <content>
+    <h2 style="font-family: 'Luminari'; font-size: 30pt;">Товары</h2>
+    <div class="container-fluid">
+      <div class="container">
+        <div class="row">
+			{% for p in products %}
+			<div class="col-md-4 product">
+				<div class="col-md-12 one-column">
+				<div style="background-image:url({{p.image}});" class="index-image"></div>
+				<hr>
+				<h3 class="font" >{{p.name}}</h3>
+				<p class="price font" >{{p.price}}</p>
+				{% if p.stock == 0 %}
+					<a class="out-of-stock purchase font">Распроданный</a>
+				{% else %}
+				{% if logged_in %}
+				<form role="form" action="{{url_for('addtocart', productid = p.id,fromcart = 'False')}}" method="POST">
+				{% endif %}
+					<input name="sname" type="text" value={{p.name}} hidden="true">
+					<input type="submit" value="Купить" class="purchase special-button p-special font">
+				</form>
+				{% endif %}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+      </div>
+    </div></content>
+<!-- Admin İşlemleri -->
+	{% if auth %}
+		<!-- Add Product -->
+		<div id="AddModal" class="modal fade">
+			<div class="modal-dialog modal-login">
+				<div class="modal-content">
+					<div class="modal-header">				
+						<h2 class="modal-title">Добавлять</h2>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<form role="form" action="{{url_for('addproduct')}}" method="POST">
+							<div class="form-group">
+								<input name="pname" autocomplete="off" type="text" class="form-control" placeholder="Название">
+							</div>
+							<div class="form-group">
+								<input name="price" autocomplete="off" type="text" class="form-control" placeholder="Цена">
+							</div>
+							<div class="form-group">
+								<input name="pstock" autocomplete="off" type="text" class="form-control" placeholder="Количество">
+							</div>
+							<div class="form-group">
+								<input name="pimage" autocomplete="off" type="text" class="form-control" placeholder="
+Ссылка на изображение">
+							</div>
+							<div class="form-group">
+								<select name="cats">
+								    <option value="Традиционный">Традиционный</option>
+								    <option value="Цифровой">Цифровой</option>
+							  	</select>
+							</div>
+							<div class="form-group">
+								<select name="features">
+									<option value="Старый">Старый</option>
+								    <option value="Свежий">Свежий</option>
+							  	</select>
+							</div>
+							<div class="form-group">
+								<input type="submit" class="btn btn-primary btn-block btn-lg" value="
+Добавить">
+							</div>
+						</form>
+						<div class="modal-footer">
+							<a href="#UpdateModal" data-dismiss="modal" data-toggle="modal">
+Обновить</a>
+							<a href="#DeleteModal" data-dismiss="modal" data-toggle="modal">
+Удалить</a>
+						</div>	
+					</div>
+				</div>
+			</div></div>
+			<div id="UpdateModal" class="modal fade">
+			<div class="modal-dialog modal-login">
+				<div class="modal-content">
+					<div class="modal-header">				
+						<h2 class="modal-title">Обновить</h2>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<form role="form" action="{{url_for('updateproduct')}}" method="POST">
+							<div class="form-group">
+								<input name="upsname" autocomplete="off" type="text" class="form-control" placeholder="Имя для поиска">
+							</div><hr>
+							<div class="form-group">
+								<input name="upname" autocomplete="off" type="text" class="form-control" placeholder="Новое имя">
+							</div>
+							<div class="form-group">
+								<input name="uprice" autocomplete="off" type="text" class="form-control" placeholder="
+Новая цена">
+							</div>
+							<div class="form-group">
+								<input name="upstock" autocomplete="off" type="text" class="form-control" placeholder="
+Новый статус на складе">
+							</div>
+							<div class="form-group">
+								<select name="ucats">
+								    <option value="Старый">Старый</option>
+								    <option value="Свежий">Свежий</option>
+							  	</select>
+							</div>
+							<div class="form-group">
+								<select name="ufeatures">
+									<option value="Старый">Старый</option>
+								    <option value="Свежий">Свежий</option>
+							  	</select>
+							</div>
+							<div class="form-group">
+								<input type="submit" class="btn btn-primary btn-block btn-lg" value="
+Обновлять">
+							</div>
+						</form>
+						<div class="modal-footer">
+							<a href="#AddModal" data-dismiss="modal" data-toggle="modal">Добавить</a>
+							<a href="#DeleteModal" data-dismiss="modal" data-toggle="modal">Удалить</a>
+						</div>				
+					</div>
+				</div>
+			</div></div>
+			<div id="DeleteModal" class="modal fade">
+			<div class="modal-dialog modal-login">
+				<div class="modal-content">
+					<div class="modal-header">				
+						<h2 class="modal-title">Удалить</h2>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<form role="form" action="{{url_for('deleteproduct')}}" method="POST">
+							<div class="form-group">
+								<input name="dpname" autocomplete="off" type="text" class="form-control" placeholder="
+Название">
+							</div>
+							<div class="form-group">
+								<input type="submit" class="btn btn-primary btn-block btn-lg" value="
+Удалить">
+							</div>
+						</form>	
+						<div class="modal-footer">
+							<a href="#AddModal" data-dismiss="modal" data-toggle="modal">
+Добавлять</a>
+							<a href="#UpdateModal" data-dismiss="modal" data-toggle="modal">
+Обновлять</a>
+						</div>			
+					</div>
+				</div>
+			</div></div>{% endif %}
+<!-- Login Popup Modal -->
+	<div id="LoginModal" class="modal fade">
+		<div class="modal-dialog modal-login">
+			<div class="modal-content">
+				<div class="modal-header">				
+					<h4 class="modal-title">Авторизоваться</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form role="form" action="{{url_for('login')}}" method="POST">
+						<div class="form-group">
+							<i class="fa fa-user"></i>
+							<input name="email" autocomplete="off" type="text" class="form-control" placeholder="E-mail" required="required">
+						</div>
+						<div class="form-group">
+							<i class="fa fa-lock"></i>
+							<input name="pw" autocomplete="off" type="password" class="form-control" placeholder="Пароль" required="required">
+						</div>
+						<div class="form-group">
+							<input type="submit" class="btn btn-primary btn-block btn-lg" value="Войти">
+						</div>
+					</form>				
+				</div>
+				<div class="modal-footer">
+					<a href="#RegisterModal" data-dismiss="modal" data-toggle="modal">Вы не член?</a>
+				</div>
+			</div>
+		</div></div>
+<!-- Register Popup Modal -->
+	<div id="RegisterModal" class="modal fade">
+		<div class="modal-dialog modal-login">
+			<div class="modal-content">
+				<div class="modal-header">				
+					<h4 class="modal-title">Регистрация</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form role="form" action="{{url_for('register')}}" method="POST">
+						<div class="form-group">
+							<i class="fa fa-user"></i>
+							<input name="name" autocomplete="off" type="text" class="form-control" placeholder="Логин" required="required">
+						</div>
+						<div class="form-group">
+							<i class="fa fa-envelope"></i>
+							<input name="email" type="text" autocomplete="off" class="form-control" placeholder="E-mail" required="required">
+						</div>
+						<div class="form-group">
+							<i class="fa fa-lock"></i>
+							<input name="pw" autocomplete="off" type="password" class="form-control" placeholder="Пароль" required="required">
+						</div>
+						<div class="form-group">
+							<input type="submit" class="btn btn-primary btn-block btn-lg" value="Создавать">
+						</div>
+					</form>				
+				</div>
+				<div class="modal-footer">
+					<a href="#LoginModal" data-dismiss="modal" data-toggle="modal">
+Уже участник?</a>
+				</div>
+			</div>
+		</div></div>
+	<!-- Footer -->
+		<footer class="container-fluid text-center" style="background-color: #333333; margin-top: 35px;">
+			<div class="container" style="padding-bottom: 10px;">
+		      <div class="icon-container">
+		        </a>
+		        <a href="https://www.instagram.com/new_erra/" id="instagram-link">
+		          <span class="fa fa-instagram fa-2x" aria-hidden="true" style="filter: grayscale();"></span>
+		        </a>
+		      </div>
+		      <p style="color: white;margin-top: -20px">new_erra</p>
+		    </div></footer>
+</body>
+</html>
